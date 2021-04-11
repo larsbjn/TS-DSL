@@ -1,4 +1,7 @@
 import knex, { Knex } from 'knex'
+import dotenv from 'dotenv'
+
+dotenv.config()
 
 export type User = {
   id: number
@@ -29,13 +32,20 @@ const constraints: ConstraintMap = new Map([
   ['post', postConstraints]
 ])
 
-const config: Knex.Config = {
+export const config: Knex.Config = {
+  debug: false,
   client: 'mysql2',
   connection: {
     host: process.env.DATABASE_HOST!,
+    database: process.env.DATABASE_NAME,
     port: Number(process.env.DATABASE_PORT!),
     user: process.env.DATABASE_USER,
   }
+}
+
+type FindFirstInputArgs<T> = {
+  where: WhereInput<T>
+  select?: Select<T>
 }
 
 class Client<T extends Record<string, any>> {
@@ -49,7 +59,9 @@ class Client<T extends Record<string, any>> {
     this.constraints = constraints.get(type)!
   }
 
-  async findFirst<W extends Select<T> | undefined>(where: WhereInput<T>, select?: W): Promise<SelectReturnType<W, T> | undefined> {
+  async findFirst<W extends Select<T> | undefined>(
+    { where, select }: FindFirstInputArgs<T>
+  ): Promise<SelectReturnType<W, T> | undefined> {
     let query = this.client(this.table)
 
     query = this.generateWhereClause(query, where)
@@ -59,105 +71,72 @@ class Client<T extends Record<string, any>> {
     console.log(query.toQuery())
 
     // @ts-ignore
-    return query.first as SelectReturnType<W, T>
+    return query.first() as SelectReturnType<W, T>
   }
 
   private generateSelectClause(query: Knex.QueryBuilder, select: Select<T>): Knex.QueryBuilder {
     for (const [key, value] of Object.entries(select)) {
       if (value === undefined) continue
-      if (value) query = query.select(key)
+      if (value) query = query.select(`${this.table}.${key}`)
     }
 
     return query
   }
 
   private generateWhereClause(query: Knex.QueryBuilder, where: WhereInput<T>): Knex.QueryBuilder {
-    // for (let [key, value] of Object.entries(where)) {
-    //   this.parseWhereArg(query, key, value)
-    // }
     for (let [key, value] of Object.entries(where)) {
-      console.log(key, value)
       if (value === undefined) continue
-      query = this.parseWhereArgs(query, key, value)
-      // if (typeof value === 'object') {
-      //     console.log(value)
-      //     clause = this.parseWhereArgs(clause, key, value)
-      // } else {
-      //   console.log('not object')
-      //   clause = this.parseWhereArg(clause, key, value)
-      // }
 
-      // query = clause
+      if (key === 'AND') query = query.and
+      else if (key === 'OR') query = query.or
+      else if (key === 'NOT') query = query.not
+
+      query = query.whereWrapped(queryBuilder => this.parseWhereArgs(queryBuilder, key, value))
     }
 
     return query
   }
-
-  // private isWhereConditional(arg: WhereInputProp<T>[string]): arg is WhereInputConditionals<T> {
-  //   if (Object.keys(arg).includes())
-  // }
 
   private parseWhereArgs(query: Knex.QueryBuilder, key: keyof WhereInputProp<T>, arg: WhereInputProp<T>[string]): Knex.QueryBuilder {
-    for (let [argKey, argValue] of Object.entries(arg)) {
-      console.log('parseArgs', argKey, argValue)
-      if (argValue === undefined) continue
-      let clause = query
-      if (typeof argValue === 'object') {
-        if (key === 'AND') {
-          console.log('and')
-          clause = clause.and = this.parseWhereArg(clause, argKey, argValue)
-        } else if (key === 'OR') {
-          clause = clause.or
-        } else if (key === 'NOT') {
-          clause = clause.not
-        } else {
-          console.log('test')
-          clause = this.parseWhereArg(clause, String(key), argValue)
-        }
-      }
+    // console.log('parseWhereArgs', key, arg)
+    // @ts-ignore
+    if (typeof arg !== 'object') query = this.parseWhereArg(query, String(key), ['equals', arg])
 
-      query = clause
+    for (let [argKey, argValue] of Object.entries(arg)) {
+      if (argValue === undefined) continue
+
+      if (typeof argValue === 'object' && !Array.isArray(argValue)) query = this.parseWhereArgs(query, argKey, argValue)
+      else query = this.parseWhereArg(query, String(key), [argKey, argValue])
     }
 
     return query
   }
 
-  private parseWhereArg(query: Knex.QueryBuilder, key: string, arg: { [K in keyof WhereInput<T>]: T[K] }): Knex.QueryBuilder {
-    console.log('arg', arg)
-    for (const [filterKey, value] of Object.entries(arg)) {
-      if (value === undefined) continue
-      switch (filterKey as keyof StringFilter | IntFilter | DateTimeNullableFilter) {
-        case 'in':
-          query = query.whereIn(key, value)
-          break
-        case 'notIn':
-          query = query.not.whereIn(key, value)
-          break
-        case 'lt':
-          query = query.where(key, '<', value)
-          break
-        case 'lte':
-          query = query.where(key, '<=', value)
-          break
-        case 'gt':
-          query = query.where(key, '>', value)
-          break
-        case 'gte':
-          query = query.where(key, '>=', value)
-          break
-        case 'contains':
-          query = query.where(key, 'like', `%${String(value)}%`)
-          break
-        case 'startsWith':
-          query = query.where(key, 'like', `${String(value)}%`)
-          break
-        case 'endsWith':
-          query = query.where(key, 'like', `%${String(value)}`)
-          break
-        case 'equals':
-          query = query.where(key, value)
-          break
-      }
+  private parseWhereArg<K extends keyof WhereInput<T>>(query: Knex.QueryBuilder, key: string, arg: [K, T[K]]): Knex.QueryBuilder {
+    const [filterKey, value] = arg
+    if (value === undefined) return query
+
+    switch (filterKey as keyof StringFilter | IntFilter | DateTimeNullableFilter) {
+      case 'in':
+        return query.whereIn(`${this.table}.${key}`, Array.isArray(value) ? value : [value])
+      // case 'notIn':
+      //   return query.whereNotIn(key, Array.isArray(value) ? value : [value])
+      case 'lt':
+        return query.where(`${this.table}.${key}`, '<', value)
+      case 'lte':
+        return query.where(`${this.table}.${key}`, '<=', value)
+      case 'gt':
+        return query.where(`${this.table}.${key}`, '>', value)
+      case 'gte':
+        return query.orWhere(`${this.table}.${key}`, '>=', value)
+      case 'contains':
+        return query.where(`${this.table}.${key}`, 'like', `%${String(value)}%`)
+      case 'startsWith':
+        return query.where(`${this.table}.${key}`, 'like', `${String(value)}%`)
+      case 'endsWith':
+        return query.where(`${this.table}.${key}`, 'like', `%${String(value)}`)
+      case 'equals':
+        return query.where(`${this.table}.${key}`, value)
     }
 
     return query
@@ -196,7 +175,7 @@ export type Enumerable<T> = T | Array<T>
 export type StringFilter = {
   equals?: string
   in?: Enumerable<string>
-  notIn?: Enumerable<string>
+  // notIn?: Enumerable<string>
   lt?: string
   lte?: string
   gt?: string
@@ -210,7 +189,7 @@ export type StringFilter = {
 export type IntFilter = {
   equals?: number
   in?: Enumerable<number>
-  notIn?: Enumerable<number>
+  // notIn?: Enumerable<number>
   lt?: number
   lte?: number
   gt?: number
@@ -221,7 +200,7 @@ export type IntFilter = {
 export type DateTimeNullableFilter = {
   equals?: Date | string | null
   in?: Enumerable<Date> | Enumerable<string> | null
-  notIn?: Enumerable<Date> | Enumerable<string> | null
+  // notIn?: Enumerable<Date> | Enumerable<string> | null
   lt?: Date | string
   lte?: Date | string
   gt?: Date | string
@@ -242,8 +221,8 @@ type WhereInputConditionals<T> = {
 }
 
 type WhereInputFilter<T extends number | string | Date> =
-  | (T extends number ? IntFilter : never)
-  | (T extends string ? StringFilter : never)
+  | (T extends number ? IntFilter | number : never)
+  | (T extends string ? StringFilter | string : never)
   | (T extends Date ? DateTimeNullableFilter : never)
 
 type HasSelect = {
