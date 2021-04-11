@@ -1,3 +1,6 @@
+# Generated client files
+src/client/generated
+
 lib-cov
 *.seed
 *.log

@@ -1,0 +1,21 @@
+database User
+
+table User:
+    id: int primary
+    name: string
+    lastname: string
+    age: int
+        constraint <= 18 && >= 0 || >= 60
+    phone: string?
+        constraint "\\d{8}"
+    email: string
+        constraint "^\\S+@\\S+\\.\\S+$"
+    address: Address?
+
+
+table Address:
+    id: int primary
+    street: string
+    zipcode: int
+        constraint 1000 - 9999
+    city: string
