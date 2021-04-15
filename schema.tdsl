@@ -2,8 +2,8 @@ database User
 
 table User:
     id: int primary
-    name: string
-    lastname: string
+    firstName: string
+    lastName: string
     age: int
         constraint <= 18 && >= 0 || >= 60
     phone: string?

@@ -1,10 +1,7 @@
 import { spawnSync } from 'child_process'
 import knex, { Knex } from 'knex'
-import dotenv from 'dotenv'
-import { config } from 'src/Dsl'
 import yargs from 'yargs'
-
-dotenv.config()
+import { config } from 'src/client/config'
 
 const client = knex(config)
 
