@@ -1,7 +1,8 @@
 import { Knex } from 'knex'
+import { join } from 'path'
 import dotenv from 'dotenv'
 
-dotenv.config()
+dotenv.config({ path: join(__dirname, 'generated/.env') })
 
 export const config: Knex.Config = {
   debug: false,

@@ -5,7 +5,7 @@ table User:
     firstName: string
     lastName: string
     age: int
-        constraint <= 18 && >= 0 || >= 60
+        constraint age <= 18 || id >= age
     phone: string?
         constraint "\\d{8}"
     email: string
@@ -14,8 +14,8 @@ table User:
 
 
 table Address:
-    id: int primary
+    id: string primary
     street: string
+        constraint "^\\S+@\\S+\\.\\S+$"
     zipcode: int
-        constraint 1000 - 9999
     city: string

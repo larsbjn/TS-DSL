@@ -1,6 +1,6 @@
 import knex, { Knex } from 'knex'
-import { TableType } from 'src/client/Client'
 import { config } from 'src/client/config'
+import { TableType, constraints as clientConstraints, TypedClient } from 'src/client/generated'
 
 export class QueryHandler {
   private readonly client: Knex
@@ -9,13 +9,13 @@ export class QueryHandler {
     this.client = knex(config)
   }
 
-  async findFirst(
+  findFirst(
     tableType: TableType,
     { where, select }: {
       where: WhereInput<any>,
       select: SelectTest<any>,
     }
-  ): Promise<any | undefined> {
+  ): Promise<any> {
     let query = this.client(tableType.tableName)
 
     query = this.generateWhereClause(query, where, tableType)
@@ -25,6 +25,10 @@ export class QueryHandler {
     console.log(query.toQuery())
 
     return query.first()
+  }
+
+  async create(tableType: TableType, data: Record<string, unknown>): Promise<any> {
+  	const constraints = clientConstraints[tableType.tableName as keyof TypedClient]
   }
 
   private generateSelectClause(query: Knex.QueryBuilder, select: Select<any>, tableType: TableType): Knex.QueryBuilder {
@@ -54,7 +58,7 @@ export class QueryHandler {
     query: Knex.QueryBuilder, key: keyof WhereInputProp<any>, arg: WhereInputProp<any>[string] | null, tableType: TableType
   ): Knex.QueryBuilder {
     // console.log('parseWhereArgs', key, arg)
-    if (typeof arg !== 'object') query = this.parseWhereArg(query, String(key), ['equals', arg], tableType)
+    if (typeof arg !== 'object') return this.parseWhereArg(query, String(key), ['equals', arg], tableType)
 
     // @ts-ignore
     for (let [argKey, argValue] of Object.entries(arg)) {

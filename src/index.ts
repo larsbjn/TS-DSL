@@ -18,6 +18,10 @@ async function test() {
     }
   })
 
+  const numberOfLarsRemoved = client.user.delete({
+    firstName: 'Lars'
+  })
+
   console.log('user', user)
 }
 
