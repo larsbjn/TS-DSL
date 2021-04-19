@@ -41,6 +41,12 @@ export class QueryEngine {
     }
   }
 
+  async delete(tableData: TableData, where: WhereInput<any>): Promise<any> {
+    let query = this.client(tableData.tableName)
+
+    return this.generateWhereClause(query, where, tableData).delete()
+  }
+
   private checkConstraints({ tableName }: TableData, data: Record<string, unknown>): boolean {
     const constraints = tableConstraints[tableName as keyof Client]
 

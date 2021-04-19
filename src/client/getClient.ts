@@ -25,7 +25,7 @@ interface Delegate {
 function generateDelegate(queryHandler: QueryEngine, tableData: TableData): Delegate {
   return {
     findFirst: args => queryHandler.findFirst.bind(queryHandler)(tableData, args),
-    delete: args => Promise.resolve(0),
+    delete: args => queryHandler.delete.bind(queryHandler)(tableData, args),
     create: args => queryHandler.create.bind(queryHandler)(tableData, args),
     update: args => Promise.resolve()
   }
