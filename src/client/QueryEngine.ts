@@ -28,7 +28,7 @@ export class QueryEngine {
 
   async create(tableData: TableData, data: Record<string, unknown>): Promise<any> {
     try {
-      if (!this.checkConstraints(tableData, data)) throw new Error(`A constraint failed during insert into ${tableData.tableName}`)
+      if (!this.checkConstraints(tableData, data)) throw new Error(`A constraint failed during ${tableData.tableName} insert`)
 
       const result = await this.client(tableData.tableName).insert(data)
 
@@ -41,10 +41,29 @@ export class QueryEngine {
     }
   }
 
-  async delete(tableData: TableData, where: WhereInput<any>): Promise<any> {
-    let query = this.client(tableData.tableName)
+  async delete(tableData: TableData, where: WhereInput<any>): Promise<number> {
+    const query = this.client(tableData.tableName)
 
     return this.generateWhereClause(query, where, tableData).delete()
+  }
+
+  async update(tableData: TableData, {
+    where,
+    data
+  }: { where: WhereInput<any>, data: Record<string, unknown> }): Promise<number> {
+    try {
+      if (!this.checkConstraints(tableData, data)) throw new Error(`A constraint failed during ${tableData.tableName} update`)
+
+      let query = this.client(tableData.tableName)
+      query = this.generateWhereClause(query, where, tableData)
+
+      const result = await query.update(data)
+
+      return result ?? 0
+    } catch (e) {
+      console.error(e)
+      return 0
+    }
   }
 
   private checkConstraints({ tableName }: TableData, data: Record<string, unknown>): boolean {

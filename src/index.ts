@@ -8,7 +8,6 @@ async function test() {
 
   const user = await client.user.findFirst({
     where: {
-      id: 1,
       firstName: { contains: 'L' },
       // NOT: { id: { gte: 2, in: 3 } }
     },
@@ -29,6 +28,17 @@ async function test() {
   })
 
   console.log('Created:', lars)
+
+  const updatedLars = await client.user.update({
+    where: {
+      firstName: 'Lars'
+    },
+    data: {
+      lastName: 'Jørgensen'
+    }
+  })
+
+  console.log('Updated:', updatedLars)
 
   const numberOfLarsRemoved = await client.user.delete({
     firstName: 'Lars'
