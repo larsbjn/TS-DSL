@@ -184,6 +184,13 @@ json5@^1.0.1:
   dependencies:
     minimist "^1.2.0"
 
+knex-stringcase@^1.4.5:
+  version "1.4.5"
+  resolved "https://registry.yarnpkg.com/knex-stringcase/-/knex-stringcase-1.4.5.tgz#47761c1ca4fffd1d276cab7bc3c1265e3669972a"
+  integrity sha512-dO8CzBAfxX6HeZ6BP+5KCMn3450MRoz3xsUascogE3OucUIyv/ki/W30YQz15EuAbHr03s9DfgiNlKfAvD+PvQ==
+  dependencies:
+    stringcase "^4.3.1"
+
 knex@^0.95.4:
   version "0.95.4"
   resolved "https://registry.yarnpkg.com/knex/-/knex-0.95.4.tgz#91578e425d054e76cf0aacbc1157fa8ee5b6da4c"
@@ -340,6 +347,11 @@ string-width@^4.1.0, string-width@^4.2.0:
     emoji-regex "^8.0.0"
     is-fullwidth-code-point "^3.0.0"
     strip-ansi "^6.0.0"
+
+stringcase@^4.3.1:
+  version "4.3.1"
+  resolved "https://registry.yarnpkg.com/stringcase/-/stringcase-4.3.1.tgz#54279c9dd7379ff50f4e47d50d036b2ac888d34b"
+  integrity sha512-Ov7McNX1sFaEX9NWijD1hIOVDDhKdnFzN9tvoa1N8xgrclouhsO4kBPVrTPhjO/zP5mn1Ww03uZ2SThNMXS7zg==
 
 strip-ansi@^6.0.0:
   version "6.0.0"

@@ -1,11 +1,14 @@
-database User
+database dsl
+url "localhost"
+username "root"
+port 3306
 
 table User:
     id: int primary
     firstName: string
     lastName: string
     age: int
-        constraint age <= 18 || id >= age
+        constraint age >= 18
     phone: string?
         constraint "\\d{8}"
     email: string

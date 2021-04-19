@@ -1,9 +1,9 @@
 import { spawnSync } from 'child_process'
 import knex, { Knex } from 'knex'
 import yargs from 'yargs'
-import { config } from 'src/client/config'
+import { getConfig } from 'src/client/config'
 
-const client = knex(config)
+const client = knex(getConfig())
 
 function generate() {
   const { stdout, stderr } = spawnSync('java', ['-jar', 'generator.jar', 'schema.tdsl', 'src/client/generated'])
