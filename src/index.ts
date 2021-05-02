@@ -6,20 +6,7 @@ dotenv.config()
 async function test() {
   const client = getClient()
 
-  const user = await client.user.findFirst({
-    where: {
-      firstName: { contains: 'L' },
-      // NOT: { id: { gte: 2, in: 3 } }
-    },
-    select: {
-      id: true,
-      firstName: true,
-    }
-  })
-
-  console.log('Found:', user)
-
-  const lars = await client.user.create({
+  const newLars = await client.user.create({
     firstName: 'Lars',
     lastName: 'Larsen',
     age: 99,
@@ -27,7 +14,23 @@ async function test() {
     phone: '12345678'
   })
 
-  console.log('Created:', lars)
+  console.log('Created:', newLars)
+
+  const lars = await client.user.findFirst({
+    where: {
+      id: { gte: 1 },
+      firstName: { contains: 'L' },
+      lastName: 'Larsen',
+      NOT: { email: { contains: 'yahoo' } }
+    },
+    select: {
+      id: true,
+      firstName: true,
+      phone: true
+    }
+  })
+
+  console.log('Found:', lars)
 
   const updatedLars = await client.user.update({
     where: {

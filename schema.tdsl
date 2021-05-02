@@ -15,7 +15,6 @@ table User:
         constraint "^\\S+@\\S+\\.\\S+$"
     address: Address?
 
-
 table Address:
     id: string primary
     street: string

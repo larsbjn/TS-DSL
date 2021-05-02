@@ -14,7 +14,7 @@ export class QueryEngine {
     tableData: TableData,
     { where, select }: {
       where: WhereInput<any>,
-      select: SelectTest<any>,
+      select: Select<any>,
     }
   ): Promise<any> {
     let query = this.client(tableData.tableName)
@@ -99,7 +99,6 @@ export class QueryEngine {
   private parseWhereArgs(
     query: Knex.QueryBuilder, key: keyof WhereInputProp<any>, arg: WhereInputProp<any>[string] | null, tableType: TableData
   ): Knex.QueryBuilder {
-    // console.log('parseWhereArgs', key, arg)
     if (typeof arg !== 'object') return this.parseWhereArg(query, String(key), ['equals', arg], tableType)
 
     // @ts-ignore
@@ -115,46 +114,34 @@ export class QueryEngine {
   }
 
   private parseWhereArg<K extends keyof WhereInput<any>>(
-    query: Knex.QueryBuilder, key: string, arg: [K, any[K]], tableType: TableData
+    query: Knex.QueryBuilder, key: string, arg: [K, any[K]], { tableName }: TableData
   ): Knex.QueryBuilder {
     const [filterKey, value] = arg
     if (value === undefined) return query
 
     switch (filterKey as keyof StringFilter | IntFilter | DateTimeNullableFilter) {
       case 'in':
-        return query.whereIn(`${tableType.tableName}.${key}`, Array.isArray(value) ? value : [value])
-      // case 'notIn':
-      //   return query.whereNotIn(key, Array.isArray(value) ? value : [value])
+        return query.whereIn(`${tableName}.${key}`, Array.isArray(value) ? value : [value])
       case 'lt':
-        return query.where(`${tableType.tableName}.${key}`, '<', value)
+        return query.where(`${tableName}.${key}`, '<', value)
       case 'lte':
-        return query.where(`${tableType.tableName}.${key}`, '<=', value)
+        return query.where(`${tableName}.${key}`, '<=', value)
       case 'gt':
-        return query.where(`${tableType.tableName}.${key}`, '>', value)
+        return query.where(`${tableName}.${key}`, '>', value)
       case 'gte':
-        return query.orWhere(`${tableType.tableName}.${key}`, '>=', value)
+        return query.orWhere(`${tableName}.${key}`, '>=', value)
       case 'contains':
-        return query.where(`${tableType.tableName}.${key}`, 'like', `%${String(value)}%`)
+        return query.where(`${tableName}.${key}`, 'like', `%${String(value)}%`)
       case 'startsWith':
-        return query.where(`${tableType.tableName}.${key}`, 'like', `${String(value)}%`)
+        return query.where(`${tableName}.${key}`, 'like', `${String(value)}%`)
       case 'endsWith':
-        return query.where(`${tableType.tableName}.${key}`, 'like', `%${String(value)}`)
+        return query.where(`${tableName}.${key}`, 'like', `%${String(value)}`)
       case 'equals':
-        return query.where(`${tableType.tableName}.${key}`, value)
+        return query.where(`${tableName}.${key}`, value)
     }
 
     return query
   }
-}
-
-type ScalarKeys<T extends Record<string, unknown>> = Scalar<T>[keyof T]
-
-type Scalar<T extends Record<string, unknown>> = {
-  [key in keyof T]: T[key] extends object ? never : key
-}
-
-type SelectTest<T extends Record<string, unknown>> = {
-  [key in ScalarKeys<T>]?: boolean
 }
 
 type Enumerable<T> = T | Array<T>
@@ -162,7 +149,6 @@ type Enumerable<T> = T | Array<T>
 export type StringFilter = {
   equals?: string
   in?: Enumerable<string>
-  // notIn?: Enumerable<string>
   lt?: string
   lte?: string
   gt?: string
@@ -170,29 +156,24 @@ export type StringFilter = {
   contains?: string
   startsWith?: string
   endsWith?: string
-  // not?: NestedStringFilter | string
 }
 
 export type IntFilter = {
   equals?: number
   in?: Enumerable<number>
-  // notIn?: Enumerable<number>
   lt?: number
   lte?: number
   gt?: number
   gte?: number
-  // not?: NestedIntFilter | number
 }
 
 export type DateTimeNullableFilter = {
   equals?: Date | string | null
   in?: Enumerable<Date> | Enumerable<string> | null
-  // notIn?: Enumerable<Date> | Enumerable<string> | null
   lt?: Date | string
   lte?: Date | string
   gt?: Date | string
   gte?: Date | string
-  // not?: NestedDateTimeNullableFilter | Date | string | null
 }
 
 type Select<T extends Record<string, any>> = Partial<Record<keyof T, boolean>>

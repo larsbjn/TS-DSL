@@ -22,11 +22,11 @@ interface Delegate {
   update(args: any): Promise<any>
 }
 
-function generateDelegate(queryHandler: QueryEngine, tableData: TableData): Delegate {
+function generateDelegate(queryEngine: QueryEngine, tableData: TableData): Delegate {
   return {
-    findFirst: args => queryHandler.findFirst.bind(queryHandler)(tableData, args),
-    delete: args => queryHandler.delete.bind(queryHandler)(tableData, args),
-    create: args => queryHandler.create.bind(queryHandler)(tableData, args),
-    update: args => queryHandler.update.bind(queryHandler)(tableData, args)
+    findFirst: args => queryEngine.findFirst.bind(queryEngine)(tableData, args),
+    delete: args => queryEngine.delete.bind(queryEngine)(tableData, args),
+    create: args => queryEngine.create.bind(queryEngine)(tableData, args),
+    update: args => queryEngine.update.bind(queryEngine)(tableData, args)
   }
 }
