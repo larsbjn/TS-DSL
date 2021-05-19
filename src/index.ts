@@ -43,11 +43,11 @@ async function test() {
 
   console.log('Updated:', updatedLars)
 
-  const numberOfLarsRemoved = await client.user.delete({
+  /*const numberOfLarsRemoved = await client.user.delete({
     firstName: 'Lars'
   })
 
-  console.log('Lars\' purged:', numberOfLarsRemoved)
+  console.log('Lars\' purged:', numberOfLarsRemoved)*/
 }
 
 test().finally(() => process.exit())

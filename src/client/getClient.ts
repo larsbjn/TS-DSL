@@ -1,5 +1,5 @@
 import { QueryEngine } from 'src/client/QueryEngine'
-import {Client, queries, QueryClient, tableData, TableData} from 'src/client/generated'
+import {Client, Queries, queries, QueryClient, tableData, TableData} from 'src/client/generated'
 
 let client: QueryClient
 
@@ -13,7 +13,7 @@ export function getClient(): QueryClient {
   })
 
   Object.entries(queries).forEach(([funcName, func]) => {
-    newClient[funcName as keyof Client] = func
+    newClient[funcName as keyof Queries] = func
   })
 
   return client = newClient as QueryClient

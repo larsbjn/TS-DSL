@@ -5,7 +5,10 @@ dotenv.config()
 
 async function test() {
     const client = getClient()
-    console.log(await client.test(99))
+    const user = await client.test(99)
+    const fred = await client.selectUser(100)
+    console.log(user)
+    console.log(fred)
 }
 
 test().finally(() => process.exit())
