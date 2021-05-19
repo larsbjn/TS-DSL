@@ -1,18 +1,22 @@
 import { QueryEngine } from 'src/client/QueryEngine'
-import { Client, tableData, TableData } from 'src/client/generated'
+import {Client, queries, QueryClient, tableData, TableData} from 'src/client/generated'
 
-let client: Client
+let client: QueryClient
 
-export function getClient(): Client {
+export function getClient(): QueryClient {
   if (client) return client
   const queryEngine = new QueryEngine()
-  const newClient: Partial<Client> = {}
+  const newClient: Partial<QueryClient> = {}
 
   Object.entries(tableData).forEach(([typeName, tableData]) => {
     newClient[typeName as keyof Client] = generateDelegate(queryEngine, tableData)
   })
 
-  return client = newClient as Client
+  Object.entries(queries).forEach(([funcName, func]) => {
+    newClient[funcName as keyof Client] = func
+  })
+
+  return client = newClient as QueryClient
 }
 
 interface Delegate {
