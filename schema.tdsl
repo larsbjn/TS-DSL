@@ -2,6 +2,7 @@ database dsl
 url "localhost"
 username "root"
 port 3306
+filepath "./db.sqlite"
 
 table User:
     id: int primary
@@ -21,3 +22,6 @@ table Address:
         constraint "^\\S+@\\S+\\.\\S+$"
     zipcode: int
     city: string
+
+query selectFirstNameOverAge : from User select age, firstName where firstName = "f" && age = 1 + 2 * ?age || email = "ab@csep.dk"
+query deleteallUser : from User delete * where firstName = "Frederik" || age = 1 + 2 * ?age

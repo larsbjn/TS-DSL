@@ -14,7 +14,16 @@ async function test() {
     phone: '12345678'
   })
 
+  const newFred = await client.user.create({
+    firstName: 'Frederik',
+    lastName: 'Frederiksen',
+    age: 100,
+    email: 'frederik@frederiksen.com',
+    phone: '87654321'
+  })
+
   console.log('Created:', newLars)
+  console.log('Created:', newFred)
 
   const lars = await client.user.findFirst({
     where: {
