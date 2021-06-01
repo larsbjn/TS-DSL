@@ -4,8 +4,8 @@
   "main": "index.js",
   "license": "MIT",
   "scripts": {
-    "test": "ts-node -r tsconfig-paths/register src/index.ts",
-    "indi": "ts-node -r tsconfig-paths/register src/individual.ts",
+    "oldTest": "ts-node -r tsconfig-paths/register src/index.ts",
+    "test": "ts-node -r tsconfig-paths/register src/individual.ts",
     "generate": "ts-node -r tsconfig-paths/register src/client/cli.ts generate",
     "reset": "ts-node -r tsconfig-paths/register src/client/cli.ts reset",
     "migrate": "ts-node -r tsconfig-paths/register src/client/cli.ts migrate"

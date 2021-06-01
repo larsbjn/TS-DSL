@@ -9,19 +9,12 @@ table User:
     firstName: string
     lastName: string
     age: int
-        constraint age >= 18
+        constraint age <= 100
     phone: string?
         constraint "\\d{8}"
     email: string
         constraint "^\\S+@\\S+\\.\\S+$"
-    address: Address?
 
-table Address:
-    id: string primary
-    street: string
-        constraint "^\\S+@\\S+\\.\\S+$"
-    zipcode: int
-    city: string
-
-query selectFirstNameOverAge : from User select age, firstName where firstName = "f" && age = 1 + 2 * ?age || email = "ab@csep.dk"
-query deleteallUser : from User delete * where firstName = "Frederik" || age = 1 + 2 * ?age
+query selectLastNameOverLegalAgeByFirstName : from User select age, firstName, lastName where firstName = ?name && age >= 18
+query allUsers : from User select *
+query deleteUserByFirstNameOrUnderCertainAge : from User delete * where firstName = ?name || age <= 1 + 2 * ?age
